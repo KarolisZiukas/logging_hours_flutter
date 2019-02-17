@@ -11,10 +11,106 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
   var gotTheDate = "NO DATE";
   var gotTheTime = "NO TIME";
   var gotTheTime2 = "NO TIME";
+  var isBreakRowVisible = false;
+
+  Widget dropDownList = Row(
+    children: <Widget>[
+      Expanded(
+        child: DropdownButton<String>(
+          hint: Text("Select shift"),
+          items: <String>['A', 'B', 'C', 'D'].map((String value) {
+            return new DropdownMenuItem<String>(
+              value: value,
+              child: new Text(value),
+            );
+          }).toList(),
+          onChanged: (_) {},
+        ),
+      ),
+    ],
+  );
+
+  Widget saveShiftInformationButton = Flexible(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Expanded(
+                child: Container(
+              margin: EdgeInsets.all(16),
+              child: RaisedButton(
+                onPressed: () {},
+                child: Text("TEXT"),
+              ),
+            ))
+          ],
+        )
+      ],
+    ),
+  );
+
+  Row breakTimePickerRow() {
+    return Row(
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: Icon(
+            Icons.free_breakfast,
+            color: Colors.black,
+          ),
+        ),
+        Flexible(
+          child: TimePickerComponent(
+            onPressed: printTime,
+            whichValueToSelect: "Start",
+          ),
+        ),
+        Flexible(
+          child: TimePickerComponent(
+            onPressed: printTime2,
+            whichValueToSelect: "End",
+          ),
+        ),
+      ],
+    );
+  }
+
+  Row shiftTimePickerRow() {
+    return Row(
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: Icon(
+            Icons.work,
+            color: Colors.black,
+          ),
+        ),
+        Flexible(
+          child: TimePickerComponent(
+            onPressed: printTime,
+            whichValueToSelect: "Start",
+          ),
+        ),
+        Flexible(
+          child: TimePickerComponent(
+            onPressed: printTime2,
+            whichValueToSelect: "End",
+          ),
+        ),
+      ],
+    );
+  }
 
   void printDate(String date) {
     setState(() {
       gotTheDate = date;
+    });
+  }
+
+  void setBreakRowVisibility(bool isVisible) {
+    setState(() {
+      isBreakRowVisible = isVisible;
     });
   }
 
@@ -55,93 +151,35 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
             "Work time",
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
+          shiftTimePickerRow(),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Icon(
-                  Icons.work,
-                  color: Colors.black,
-                ),
-              ),
-              Flexible(
-                child: TimePickerComponent(
-                  onPressed: printTime,
-                  whichValueToSelect: "Start",
-                ),
-              ),
-              Flexible(
-                child: TimePickerComponent(
-                  onPressed: printTime2,
-                  whichValueToSelect: "End",
-                ),
-              ),
+              Text("Had a break?"),
+              Switch(
+                value: isBreakRowVisible,
+                onChanged: (bool value) {
+                  setBreakRowVisibility(value);
+                },
+              )
             ],
           ),
-          Text(
-            "Break time",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          Row(
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Icon(
-                  Icons.free_breakfast,
-                  color: Colors.black,
-                ),
-              ),
-              Flexible(
-                child: TimePickerComponent(
-                  onPressed: printTime,
-                  whichValueToSelect: "Start",
-                ),
-              ),
-              Flexible(
-                child: TimePickerComponent(
-                  onPressed: printTime2,
-                  whichValueToSelect: "End",
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: DropdownButton<String>(
-                  hint: Text("Select shift"),
-                  items: <String>['A', 'B', 'C', 'D'].map((String value) {
-                    return new DropdownMenuItem<String>(
-                      value: value,
-                      child: new Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (_) {},
-                ),
-              ),
-            ],
-          ),
-          Text("$gotTheTime"),
-          Text("$gotTheTime2"),
-          Flexible(
+          Visibility(
+            visible: isBreakRowVisible,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                        child: Container(
-                      margin: EdgeInsets.all(16),
-                      child: RaisedButton(
-                        onPressed: () {},
-                        child: Text("TEXT"),
-                      ),
-                    ))
-                  ],
-                )
+                Text(
+                  "Break time",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                breakTimePickerRow(),
               ],
             ),
-          )
+          ),
+          dropDownList,
+          Text("$gotTheTime"),
+          Text("$gotTheTime2"),
+          saveShiftInformationButton
         ],
       ),
     );
