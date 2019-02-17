@@ -10,10 +10,23 @@ class AddNewShiftActivity extends StatefulWidget {
 class AddNewShiftActivityState extends State<AddNewShiftActivity> {
   var gotTheDate = "NO DATE";
   var gotTheTime = "NO TIME";
+  var gotTheTime2 = "NO TIME";
 
   void printDate(String date) {
     setState(() {
       gotTheDate = date;
+    });
+  }
+
+  void printTime(ShiftTimeModel date) {
+    setState(() {
+      gotTheTime = date.hour.toString();
+    });
+  }
+
+  void printTime2(ShiftTimeModel date) {
+    setState(() {
+      gotTheTime2 = date.minute.toString();
     });
   }
 
@@ -28,36 +41,65 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
       ),
       body: Column(
         children: <Widget>[
+          Container(
+            padding: EdgeInsets.only(top: 16),
+            child: Text(
+              "Shift date",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
           DateRowComponent(
             onPressed: printDate,
           ),
+          Text(
+            "Work time",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           Row(
             children: <Widget>[
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Icon(
+                  Icons.work,
+                  color: Colors.black,
+                ),
+              ),
               Flexible(
                 child: TimePickerComponent(
-                  onPressed: printDate,
+                  onPressed: printTime,
                   whichValueToSelect: "Start",
                 ),
               ),
               Flexible(
                 child: TimePickerComponent(
-                  onPressed: printDate,
+                  onPressed: printTime2,
                   whichValueToSelect: "End",
                 ),
               ),
             ],
           ),
+          Text(
+            "Break time",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           Row(
             children: <Widget>[
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Icon(
+                  Icons.free_breakfast,
+                  color: Colors.black,
+                ),
+              ),
               Flexible(
                 child: TimePickerComponent(
-                  onPressed: printDate,
+                  onPressed: printTime,
                   whichValueToSelect: "Start",
                 ),
               ),
               Flexible(
                 child: TimePickerComponent(
-                  onPressed: printDate,
+                  onPressed: printTime2,
                   whichValueToSelect: "End",
                 ),
               ),
@@ -67,6 +109,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
             children: <Widget>[
               Expanded(
                 child: DropdownButton<String>(
+                  hint: Text("Select shift"),
                   items: <String>['A', 'B', 'C', 'D'].map((String value) {
                     return new DropdownMenuItem<String>(
                       value: value,
@@ -78,6 +121,8 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
               ),
             ],
           ),
+          Text("$gotTheTime"),
+          Text("$gotTheTime2"),
           Flexible(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -85,11 +130,13 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
                 Row(
                   children: <Widget>[
                     Expanded(
+                        child: Container(
+                      margin: EdgeInsets.all(16),
                       child: RaisedButton(
                         onPressed: () {},
                         child: Text("TEXT"),
                       ),
-                    )
+                    ))
                   ],
                 )
               ],
