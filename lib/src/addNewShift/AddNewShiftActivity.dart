@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'DateRowComponent.dart';
-import 'TimePickerComponent.dart';
+import 'package:logging_hours/src/addNewShift/ShiftModel.dart';
+import 'package:logging_hours/src/resources/Repository.dart';
+import 'package:logging_hours/src/ui/DateRowComponent.dart';
+import 'package:logging_hours/src/ui/TimePickerComponent.dart';
 
 class AddNewShiftActivity extends StatefulWidget {
   @override
@@ -40,7 +42,9 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
                 child: Container(
               margin: EdgeInsets.all(16),
               child: RaisedButton(
-                onPressed: () {},
+                onPressed: () {
+                  saveShift();
+                },
                 child: Text("TEXT"),
               ),
             ))
@@ -126,6 +130,27 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
     });
   }
 
+  static void saveShift() {
+    var model = ShiftModel(
+        shiftDate: "3",
+        shiftStartTime: "1",
+        shiftEndTime: "baigiasi",
+        breakStartTime: "1",
+        breakEndTime: "1",
+        hoursWorked: "1",
+        breakDuration: "1",
+        shiftName: "1",
+        shiftWage: "1",
+        hadBreak: 0);
+
+    Repository.getRepository().insertNewShift(model);
+  }
+
+  void loadShift(String id) async {
+    var shiftModel = await Repository.getRepository().getShiftModel(id);
+    print(shiftModel);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,7 +204,28 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
           dropDownList,
           Text("$gotTheTime"),
           Text("$gotTheTime2"),
-          saveShiftInformationButton
+          saveShiftInformationButton,
+          Flexible(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                        child: Container(
+                      margin: EdgeInsets.all(16),
+                      child: RaisedButton(
+                        onPressed: () {
+                          loadShift("3");
+                        },
+                        child: Text("TEXT"),
+                      ),
+                    ))
+                  ],
+                )
+              ],
+            ),
+          )
         ],
       ),
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'src/ui/AddNewShiftActivity.dart';
+import 'package:logging_hours/src/addNewShift/AddNewShiftActivity.dart';
 
 void main() => runApp(MyApp());
 
