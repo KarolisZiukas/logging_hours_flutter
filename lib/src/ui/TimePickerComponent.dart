@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/cupertino.dart';
 
 class ShiftTimeModel {
   final int hour;
@@ -21,7 +21,6 @@ class TimePickerComponent extends StatefulWidget {
 }
 
 class TimePickerComponentState extends State<TimePickerComponent> {
-  var formatter = new DateFormat('yyyy-MM-dd');
   TimeOfDay currentTime = TimeOfDay.now();
   String formatted = "Select time";
 
@@ -30,7 +29,11 @@ class TimePickerComponentState extends State<TimePickerComponent> {
         await showTimePicker(context: context, initialTime: currentTime);
     if (picked != null)
       setState(() {
-        formatted = "${picked.hour.toString()}:${picked.minute.toString()}";
+        if (picked.minute < 10) {
+          formatted = "${picked.hour}:0${picked.minute}";
+        } else {
+          formatted = "${picked.hour}:${picked.minute}";
+        }
         widget.onPressed(ShiftTimeModel(picked.hour, picked.minute));
       });
   }
@@ -45,7 +48,7 @@ class TimePickerComponentState extends State<TimePickerComponent> {
             onTap: () => _selectDate(context),
             child: Container(
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15.0),
+                    borderRadius: BorderRadius.circular(16.0),
                     color: Color(0xFFFFFFFF),
                     border: Border.all(color: Color(0xFFFFFFFF), width: 2.0)),
                 padding: EdgeInsets.all(16),

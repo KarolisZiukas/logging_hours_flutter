@@ -1,4 +1,3 @@
-
 class ShiftModel {
   static final String dbShiftId = "shiftId";
   static final String dbShiftDate = "shiftdate";
@@ -23,7 +22,7 @@ class ShiftModel {
   String breakDuration = "";
   String shiftName = "";
   String shiftWage = "";
-  int hadBreak = 0;
+  String hadBreak = "1";
 
   ShiftModel({this.shiftId,
     this.shiftDate,
@@ -37,7 +36,6 @@ class ShiftModel {
     this.shiftWage,
     this.hadBreak
   });
-
 
   ShiftModel.fromMap(Map<String, dynamic> map) : this (
       shiftId: map[dbShiftId],
@@ -65,7 +63,7 @@ class ShiftModel {
       dbBreakDuration: breakDuration,
       dbShiftName: shiftName,
       dbShiftWage: shiftWage,
-      dbHadBreak: hadBreak.toString()
+      dbHadBreak: hadBreak
     };
   }
 }

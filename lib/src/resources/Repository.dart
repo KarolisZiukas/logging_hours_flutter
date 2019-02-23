@@ -18,8 +18,8 @@ class Repository {
     return await database.initDatabase();
   }
 
-  Future<ShiftModel> getShiftModel(String id) {
-    return database.getShiftModel(id);
+  Future<List<ShiftModel>> getAllShiftModels() {
+    return database.getShiftModel();
   }
 
   Future<ShiftModel> insertNewShift(ShiftModel model) {

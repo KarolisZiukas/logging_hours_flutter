@@ -30,7 +30,7 @@ class ShiftsDatabase {
     database = await openDatabase(path, version: 2,
         onCreate: (Database db, int version) async {
       await db.execute("CREATE TABLE $tableName ("
-          "${ShiftModel.dbShiftId} STRING PRIMARY KEY,"
+          "${ShiftModel.dbShiftId} TEXT PRIMARY KEY,"
           "${ShiftModel.dbShiftDate} TEXT,"
           "${ShiftModel.dbShiftStartTime} TEXT,"
           "${ShiftModel.dbShiftEndTime} TEXT,"
@@ -47,12 +47,15 @@ class ShiftsDatabase {
 
   Future<ShiftModel> insertShift(ShiftModel model) async {
     var db = await getDatabase();
-    var something = await db.insert(tableName, model.toMap());
+    var addedId = await db.insert(tableName, model.toMap());
+    model.shiftId = addedId.toString();
     return model;
   }
 
-  Future<ShiftModel> getShiftModel(String id) async {
-    List<Map> maps = await database.query(tableName,
+  Future<List<ShiftModel>> getShiftModel() async {
+    var db = await getDatabase();
+    print("GET SHIFT MODEL $db");
+    var maps = await db.query(tableName,
         columns: [
           ShiftModel.dbShiftId,
           ShiftModel.dbShiftDate,
@@ -65,14 +68,11 @@ class ShiftsDatabase {
           ShiftModel.dbShiftName,
           ShiftModel.dbShiftWage,
           ShiftModel.dbHadBreak
-        ],
-        where: '${ShiftModel.dbShiftId} = ?',
-        whereArgs: [id]);
-    if (maps.length > 0) {
-      print("NOT EMPTY");
-      return ShiftModel.fromMap(maps.first);
+        ]);
+    if (maps.isNotEmpty) {
+      return maps.map((model) => ShiftModel.fromMap(model)).toList();
     } else {
-      print("EMPTY");
+      print("No shift found");
       return null;
     }
   }

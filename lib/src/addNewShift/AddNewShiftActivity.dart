@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging_hours/src/addNewShift/ShiftModel.dart';
 import 'package:logging_hours/src/resources/Repository.dart';
@@ -45,7 +46,17 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
                 onPressed: () {
                   saveShift();
                 },
-                child: Text("TEXT"),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget> [
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Icon(Icons.save),
+                    ),
+                    Text("Save Shift"),
+                  ]
+                ),
               ),
             ))
           ],
@@ -132,6 +143,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
 
   static void saveShift() {
     var model = ShiftModel(
+        shiftId: "4",
         shiftDate: "3",
         shiftStartTime: "1",
         shiftEndTime: "baigiasi",
@@ -141,14 +153,9 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
         breakDuration: "1",
         shiftName: "1",
         shiftWage: "1",
-        hadBreak: 0);
+        hadBreak: "1");
 
     Repository.getRepository().insertNewShift(model);
-  }
-
-  void loadShift(String id) async {
-    var shiftModel = await Repository.getRepository().getShiftModel(id);
-    print(shiftModel);
   }
 
   @override
@@ -177,17 +184,23 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           shiftTimePickerRow(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text("Had a break?"),
-              Switch(
-                value: isBreakRowVisible,
-                onChanged: (bool value) {
-                  setBreakRowVisibility(value);
-                },
-              )
-            ],
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                  Text(
+                    "Had a break?",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                Switch(
+                  value: isBreakRowVisible,
+                  onChanged: (bool value) {
+                    setBreakRowVisibility(value);
+                  },
+                )
+              ],
+            ),
           ),
           Visibility(
             visible: isBreakRowVisible,
@@ -201,31 +214,11 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
               ],
             ),
           ),
-          dropDownList,
-          Text("$gotTheTime"),
-          Text("$gotTheTime2"),
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: dropDownList,
+          ),
           saveShiftInformationButton,
-          Flexible(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                        child: Container(
-                      margin: EdgeInsets.all(16),
-                      child: RaisedButton(
-                        onPressed: () {
-                          loadShift("3");
-                        },
-                        child: Text("TEXT"),
-                      ),
-                    ))
-                  ],
-                )
-              ],
-            ),
-          )
         ],
       ),
     );
