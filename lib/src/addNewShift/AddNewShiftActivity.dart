@@ -33,37 +33,39 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
     ],
   );
 
-  Widget saveShiftInformationButton = Flexible(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            Expanded(
-                child: Container(
-              margin: EdgeInsets.all(16),
-              child: RaisedButton(
-                onPressed: () {
-                  saveShift();
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget> [
-                    Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Icon(Icons.save),
+  Widget saveShiftInformationButton(String text) {
+    return Flexible(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                  child: Container(
+                    margin: EdgeInsets.all(16),
+                    child: RaisedButton(
+                      onPressed: () {
+                  saveShift(gotTheTime, context);
+                      },
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.all(8),
+                              child: Icon(Icons.save),
+                            ),
+                            Text("Save Shift"),
+                          ]
+                      ),
                     ),
-                    Text("Save Shift"),
-                  ]
-                ),
-              ),
-            ))
-          ],
-        )
-      ],
-    ),
-  );
+                  ))
+            ],
+          )
+        ],
+      ),
+    );
+  }
 
   Row breakTimePickerRow() {
     return Row(
@@ -141,11 +143,11 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
     });
   }
 
-  static void saveShift() {
+  static void saveShift(String gotTheTime, BuildContext context) {
     var model = ShiftModel(
         shiftDate: "3",
         shiftStartTime: "1",
-        shiftEndTime: "baigiasi",
+        shiftEndTime: gotTheTime,
         breakStartTime: "1",
         breakEndTime: "1",
         hoursWorked: "1",
@@ -154,6 +156,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
         shiftWage: "1",
         hadBreak: "1");
     bloc.insertShift(model);
+    Navigator.pop(context, true);
   }
 
   @override
@@ -216,7 +219,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
             padding: EdgeInsets.all(16),
             child: dropDownList,
           ),
-          saveShiftInformationButton
+          saveShiftInformationButton(gotTheTime),
         ],
       ),
     );

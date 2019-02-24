@@ -64,13 +64,23 @@ class _MyHomePageState extends State<MyHomePage> {
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => AddNewShiftActivity()));
+            navigateToAddShift(context);
         },
         tooltip: 'Add new shift',
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  navigateToAddShift(BuildContext context) async{
+
+    final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => AddNewShiftActivity()));
+
+    if(result == true) {
+      bloc.getAllShifts();
+    }
   }
 
   @override
