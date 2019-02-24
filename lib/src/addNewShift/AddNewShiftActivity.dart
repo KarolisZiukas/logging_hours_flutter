@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logging_hours/src/addNewShift/AddNewShiftBloc.dart';
 import 'package:logging_hours/src/addNewShift/ShiftModel.dart';
-import 'package:logging_hours/src/resources/Repository.dart';
 import 'package:logging_hours/src/ui/DateRowComponent.dart';
 import 'package:logging_hours/src/ui/TimePickerComponent.dart';
 
@@ -143,7 +143,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
 
   static void saveShift() {
     var model = ShiftModel(
-        shiftId: "4",
+        shiftId: "6",
         shiftDate: "3",
         shiftStartTime: "1",
         shiftEndTime: "baigiasi",
@@ -154,8 +154,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
         shiftName: "1",
         shiftWage: "1",
         hadBreak: "1");
-
-    Repository.getRepository().insertNewShift(model);
+    bloc.insertShift(model);
   }
 
   @override
@@ -218,7 +217,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
             padding: EdgeInsets.all(16),
             child: dropDownList,
           ),
-          saveShiftInformationButton,
+          saveShiftInformationButton
         ],
       ),
     );
