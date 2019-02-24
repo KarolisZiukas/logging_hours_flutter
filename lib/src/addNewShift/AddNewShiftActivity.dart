@@ -143,7 +143,6 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
 
   static void saveShift() {
     var model = ShiftModel(
-        shiftId: "6",
         shiftDate: "3",
         shiftStartTime: "1",
         shiftEndTime: "baigiasi",

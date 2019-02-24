@@ -12,7 +12,7 @@ class ShiftModel {
   static final String dbHadBreak = "hadBreak";
 
 
-  String shiftId = "";
+  int shiftId = 0;
   String shiftDate = "";
   String shiftStartTime = "";
   String shiftEndTime = "";
@@ -52,8 +52,7 @@ class ShiftModel {
   );
 
   Map<String, dynamic> toMap() {
-    return {
-      dbShiftId: shiftId,
+    var map = <String, dynamic> {
       dbShiftDate: shiftDate,
       dbShiftStartTime: shiftStartTime,
       dbShiftEndTime: shiftEndTime,
@@ -65,5 +64,9 @@ class ShiftModel {
       dbShiftWage: shiftWage,
       dbHadBreak: hadBreak
     };
+    if(shiftId != null) {
+      map[dbShiftId] = shiftId;
+    }
+    return map;
   }
 }

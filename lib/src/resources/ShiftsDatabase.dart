@@ -10,8 +10,6 @@ class ShiftsDatabase {
 
   Database database;
 
-//  bool didInit = false;
-
   static ShiftsDatabase getShiftsDatabase() {
     return shiftsDatabase;
   }
@@ -27,10 +25,10 @@ class ShiftsDatabase {
     var documentsDirectoryPath = await getDatabasesPath();
     print("Trying to create");
     String path = join(documentsDirectoryPath, "shifts.db");
-    database = await openDatabase(path, version: 2,
+    database = await openDatabase(path, version: 3,
         onCreate: (Database db, int version) async {
       await db.execute("CREATE TABLE $tableName ("
-          "${ShiftModel.dbShiftId} TEXT PRIMARY KEY,"
+          "${ShiftModel.dbShiftId} INTEGER PRIMARY KEY AUTOINCREMENT,"
           "${ShiftModel.dbShiftDate} TEXT,"
           "${ShiftModel.dbShiftStartTime} TEXT,"
           "${ShiftModel.dbShiftEndTime} TEXT,"
@@ -48,7 +46,7 @@ class ShiftsDatabase {
   Future<ShiftModel> insertShift(ShiftModel model) async {
     var db = await getDatabase();
     var addedId = await db.insert(tableName, model.toMap());
-    model.shiftId = addedId.toString();
+    model.shiftId = addedId;
     return model;
   }
 
