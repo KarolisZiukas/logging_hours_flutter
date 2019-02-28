@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logging_hours/src/WageCalculatorHelper.dart';
 import 'package:logging_hours/src/addNewShift/AddNewShiftBloc.dart';
 import 'package:logging_hours/src/addNewShift/ShiftModel.dart';
+import 'package:logging_hours/src/addNewShift/ShiftTimeModelHelper.dart';
 import 'package:logging_hours/src/ui/DateRowComponent.dart';
 import 'package:logging_hours/src/ui/TimePickerComponent.dart';
 
@@ -11,10 +13,12 @@ class AddNewShiftActivity extends StatefulWidget {
 }
 
 class AddNewShiftActivityState extends State<AddNewShiftActivity> {
-  var gotTheDate = "NO DATE";
-  var gotTheTime = "NO TIME";
-  var gotTheTime2 = "NO TIME";
   var isBreakRowVisible = false;
+  String shiftDate;
+  ShiftTimeModel shiftStartTime;
+  ShiftTimeModel shiftEndTime;
+  ShiftTimeModel breakStartTime;
+  ShiftTimeModel breakEndTime;
 
   Widget dropDownList = Row(
     children: <Widget>[
@@ -33,7 +37,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
     ],
   );
 
-  Widget saveShiftInformationButton(String text) {
+  Widget saveShiftInformationButton() {
     return Flexible(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -42,24 +46,30 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
             children: <Widget>[
               Expanded(
                   child: Container(
-                    margin: EdgeInsets.all(16),
-                    child: RaisedButton(
-                      onPressed: () {
-                  saveShift(gotTheTime, context);
-                      },
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.all(8),
-                              child: Icon(Icons.save),
-                            ),
-                            Text("Save Shift"),
-                          ]
-                      ),
-                    ),
-                  ))
+                margin: EdgeInsets.all(16),
+                child: RaisedButton(
+                  onPressed: () {
+                    saveShift(
+                        context,
+                        shiftDate,
+                        shiftStartTime,
+                        shiftEndTime,
+                        breakStartTime,
+                        breakEndTime
+                    );
+                  },
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(Icons.save),
+                        ),
+                        Text("Save Shift"),
+                      ]),
+                ),
+              ))
             ],
           )
         ],
@@ -79,13 +89,13 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
         ),
         Flexible(
           child: TimePickerComponent(
-            onPressed: printTime,
+            onPressed: setBreakStartTime,
             whichValueToSelect: "Start",
           ),
         ),
         Flexible(
           child: TimePickerComponent(
-            onPressed: printTime2,
+            onPressed: setBreakEndTime,
             whichValueToSelect: "End",
           ),
         ),
@@ -105,13 +115,13 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
         ),
         Flexible(
           child: TimePickerComponent(
-            onPressed: printTime,
+            onPressed: setShiftStartTime,
             whichValueToSelect: "Start",
           ),
         ),
         Flexible(
           child: TimePickerComponent(
-            onPressed: printTime2,
+            onPressed: setShiftEndTime,
             whichValueToSelect: "End",
           ),
         ),
@@ -121,7 +131,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
 
   void printDate(String date) {
     setState(() {
-      gotTheDate = date;
+      shiftDate = date;
     });
   }
 
@@ -131,32 +141,60 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
     });
   }
 
-  void printTime(ShiftTimeModel date) {
+  void setShiftStartTime(ShiftTimeModel time) {
     setState(() {
-      gotTheTime = date.hour.toString();
+      shiftStartTime = time;
     });
   }
 
-  void printTime2(ShiftTimeModel date) {
+  void setShiftEndTime(ShiftTimeModel time) {
     setState(() {
-      gotTheTime2 = date.minute.toString();
+      shiftEndTime = time;
     });
   }
 
-  static void saveShift(String gotTheTime, BuildContext context) {
-    var model = ShiftModel(
-        shiftDate: "3",
-        shiftStartTime: "1",
-        shiftEndTime: gotTheTime,
-        breakStartTime: "1",
-        breakEndTime: "1",
-        hoursWorked: "1",
-        breakDuration: "1",
-        shiftName: "1",
-        shiftWage: "1",
-        hadBreak: "1");
-    bloc.insertShift(model);
-    Navigator.pop(context, true);
+  void setBreakStartTime(ShiftTimeModel time) {
+    setState(() {
+      breakStartTime = time;
+    });
+  }
+
+  void setBreakEndTime(ShiftTimeModel time) {
+    setState(() {
+      breakEndTime = time;
+    });
+  }
+
+  static void saveShift(
+      BuildContext context,
+      String shiftDate,
+      ShiftTimeModel shiftStartTime,
+      ShiftTimeModel shiftEndTime,
+      ShiftTimeModel breakStartTime,
+      ShiftTimeModel breakEndTime) {
+    if(shiftDate != null) {
+      var model = ShiftModel(
+          shiftDate: shiftDate,
+          shiftStartTime: ShiftTimeModelHelper.getFormattedDateString(shiftStartTime),
+          shiftEndTime: ShiftTimeModelHelper.getFormattedDateString(shiftEndTime),
+          breakStartTime: ShiftTimeModelHelper.getFormattedDateString(breakStartTime),
+          breakEndTime: ShiftTimeModelHelper.getFormattedDateString(breakEndTime),
+          hoursWorked: WageCalculatorHelper.getFormattedTimeSpent(shiftStartTime, shiftEndTime),
+          breakDuration: WageCalculatorHelper.getFormattedTimeSpent(breakStartTime, breakEndTime),
+          shiftName: "1",
+          shiftWage: WageCalculatorHelper.getCalculatedWage(
+              shiftStartTime,
+              shiftEndTime,
+              7,
+              breakStartTime: breakStartTime,
+              breakEndTime: breakEndTime
+          ).toString(),
+          hadBreak: "1");
+      bloc.insertShift(model);
+      Navigator.pop(context, true);
+    } else {
+      print("Empty date");
+    }
   }
 
   @override
@@ -190,10 +228,10 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                  Text(
-                    "Had a break?",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
+                Text(
+                  "Had a break?",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
                 Switch(
                   value: isBreakRowVisible,
                   onChanged: (bool value) {
@@ -219,7 +257,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
             padding: EdgeInsets.all(16),
             child: dropDownList,
           ),
-          saveShiftInformationButton(gotTheTime),
+          saveShiftInformationButton(),
         ],
       ),
     );

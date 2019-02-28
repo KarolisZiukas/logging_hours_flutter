@@ -35,7 +35,7 @@ class ShiftsListCreatorState extends State<ShiftsListCreator> {
         subtitle: Row(
           children: <Widget>[
             Icon(Icons.linear_scale, color: Colors.yellowAccent),
-            Text("${item.shiftEndTime}", style: TextStyle(color: Colors.white))
+            Text("${item.shiftWage}", style: TextStyle(color: Colors.white))
           ],
         ),
         trailing:
