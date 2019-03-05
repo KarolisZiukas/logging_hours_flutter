@@ -4,6 +4,7 @@ import 'package:logging_hours/src/WageCalculatorHelper.dart';
 import 'package:logging_hours/src/addNewShift/AddNewShiftBloc.dart';
 import 'package:logging_hours/src/addNewShift/ShiftModel.dart';
 import 'package:logging_hours/src/addNewShift/ShiftTimeModelHelper.dart';
+import 'package:logging_hours/src/addNewShift/WorkPlaceModel.dart';
 import 'package:logging_hours/src/ui/DateRowComponent.dart';
 import 'package:logging_hours/src/ui/TimePickerComponent.dart';
 
@@ -20,22 +21,30 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
   ShiftTimeModel breakStartTime;
   ShiftTimeModel breakEndTime;
 
-  Widget dropDownList = Row(
-    children: <Widget>[
-      Expanded(
-        child: DropdownButton<String>(
-          hint: Text("Select shift"),
-          items: <String>['A', 'B', 'C', 'D'].map((String value) {
-            return new DropdownMenuItem<String>(
-              value: value,
-              child: new Text(value),
-            );
-          }).toList(),
-          onChanged: (_) {},
+  Widget selectWorkPlaceRow() {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: DropdownButton<String>(
+            hint: Text("Select shift"),
+            items: <String>['A', 'B', 'C', 'D'].map((String value) {
+              return new DropdownMenuItem<String>(
+                value: value,
+                child: new Text(value),
+              );
+            }).toList(),
+            onChanged: (_) {},
+          ),
         ),
-      ),
-    ],
-  );
+        FlatButton(
+          child: Text("Add new"),
+          onPressed: () {
+            showAddNewWorkPlaceDialog(context);
+          },
+        )
+      ],
+    );
+  }
 
   Widget saveShiftInformationButton() {
     return Flexible(
@@ -49,14 +58,8 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
                 margin: EdgeInsets.all(16),
                 child: RaisedButton(
                   onPressed: () {
-                    saveShift(
-                        context,
-                        shiftDate,
-                        shiftStartTime,
-                        shiftEndTime,
-                        breakStartTime,
-                        breakEndTime
-                    );
+                    saveShift(context, shiftDate, shiftStartTime, shiftEndTime,
+                        breakStartTime, breakEndTime);
                   },
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -165,6 +168,69 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
     });
   }
 
+  static void showAddNewWorkPlaceDialog(BuildContext buildContext) {
+    String workPlaceName;
+    String wage;
+    showDialog(
+      context: buildContext,
+      builder: (BuildContext context) => Dialog(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: "Enter shift name"
+                    ),
+                    onChanged: (text) {
+                      workPlaceName = text;
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                        hintText: "Enter wage \$/hour"
+                    ),
+                    onChanged: (text) {
+                      wage = text;
+                    },
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    FlatButton(
+                      child: Text("Save"),
+                      onPressed: () {
+                        saveNewWorkPlace(workPlaceName, wage);
+                        Navigator.pop(context);
+                      },
+                    ),
+                    FlatButton(
+                      child: Text("Cancel"),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+
+  static void saveNewWorkPlace(String workPlaceName, String wage) {
+    bloc.insertNewWorkPlace(WorkPlaceModel(
+      workPlaceName: workPlaceName,
+      workPlaceWage: wage));
+  }
+
   static void saveShift(
       BuildContext context,
       String shiftDate,
@@ -172,23 +238,26 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
       ShiftTimeModel shiftEndTime,
       ShiftTimeModel breakStartTime,
       ShiftTimeModel breakEndTime) {
-    if(shiftDate != null) {
+    if (shiftDate != null) {
       var model = ShiftModel(
           shiftDate: shiftDate,
-          shiftStartTime: ShiftTimeModelHelper.getFormattedDateString(shiftStartTime),
-          shiftEndTime: ShiftTimeModelHelper.getFormattedDateString(shiftEndTime),
-          breakStartTime: ShiftTimeModelHelper.getFormattedDateString(breakStartTime),
-          breakEndTime: ShiftTimeModelHelper.getFormattedDateString(breakEndTime),
-          hoursWorked: WageCalculatorHelper.getFormattedTimeSpent(shiftStartTime, shiftEndTime),
-          breakDuration: WageCalculatorHelper.getFormattedTimeSpent(breakStartTime, breakEndTime),
+          shiftStartTime:
+              ShiftTimeModelHelper.getFormattedDateString(shiftStartTime),
+          shiftEndTime:
+              ShiftTimeModelHelper.getFormattedDateString(shiftEndTime),
+          breakStartTime:
+              ShiftTimeModelHelper.getFormattedDateString(breakStartTime),
+          breakEndTime:
+              ShiftTimeModelHelper.getFormattedDateString(breakEndTime),
+          hoursWorked: WageCalculatorHelper.getFormattedTimeSpent(
+              shiftStartTime, shiftEndTime),
+          breakDuration: WageCalculatorHelper.getFormattedTimeSpent(
+              breakStartTime, breakEndTime),
           shiftName: "1",
           shiftWage: WageCalculatorHelper.getCalculatedWage(
-              shiftStartTime,
-              shiftEndTime,
-              7,
-              breakStartTime: breakStartTime,
-              breakEndTime: breakEndTime
-          ).toString(),
+                  shiftStartTime, shiftEndTime, 7,
+                  breakStartTime: breakStartTime, breakEndTime: breakEndTime)
+              .toString(),
           hadBreak: "1");
       bloc.insertShift(model);
       Navigator.pop(context, true);
@@ -255,7 +324,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
           ),
           Padding(
             padding: EdgeInsets.all(16),
-            child: dropDownList,
+            child: selectWorkPlaceRow(),
           ),
           saveShiftInformationButton(),
         ],
