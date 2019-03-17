@@ -20,21 +20,14 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
   ShiftTimeModel shiftEndTime;
   ShiftTimeModel breakStartTime;
   ShiftTimeModel breakEndTime;
+  String selectedWorkPlace = "Select work place";
+
 
   Widget selectWorkPlaceRow() {
     return Row(
       children: <Widget>[
         Expanded(
-          child: DropdownButton<String>(
-            hint: Text("Select shift"),
-            items: <String>['A', 'B', 'C', 'D'].map((String value) {
-              return new DropdownMenuItem<String>(
-                value: value,
-                child: new Text(value),
-              );
-            }).toList(),
-            onChanged: (_) {},
-          ),
+          child: buildWorkPlacesList()
         ),
         FlatButton(
           child: Text("Add new"),
@@ -132,10 +125,62 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
     );
   }
 
+  Widget buildWorkPlacesList() {
+    return StreamBuilder(
+        stream: bloc.workPlaceFetcher,
+        builder: (context, AsyncSnapshot<List<WorkPlaceModel>> snapshot) {
+          if (snapshot.hasData) {
+            List<WorkPlaceModel> workPlacesList = snapshot.data;
+            return DropdownButton<WorkPlaceModel>(
+              hint: Text(selectedWorkPlace),
+              items: workPlacesList.map((WorkPlaceModel value) {
+                return new DropdownMenuItem(
+                    value: value,
+                    child: workPlaceItem(value)
+                );
+              }).toList(),
+              onChanged: (WorkPlaceModel model) {
+                setState(() {
+                  selectedWorkPlace = "${model.workPlaceName} ${model.workPlaceWage}\$/hour";
+                });
+              },
+            );
+          } else {
+            return Text("Error loading work places");
+          }
+        }
+    );
+  }
+
+  Widget workPlaceItem(WorkPlaceModel workPlaceModel) {
+    return Container(
+      color: Colors.amber,
+      width: 250.0,
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Text(workPlaceModel.workPlaceName),
+          Container(
+            margin: EdgeInsets.only(left: 16),
+            child: Text(workPlaceModel.workPlaceWage),
+          )
+        ],
+      ),
+    );
+
+  }
+
   void printDate(String date) {
     setState(() {
       shiftDate = date;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    bloc.getWorkPlaces();
   }
 
   void setBreakRowVisibility(bool isVisible) {
@@ -294,6 +339,10 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
           shiftTimePickerRow(),
           Padding(
             padding: EdgeInsets.all(16),
+            child: selectWorkPlaceRow(),
+          ),
+          Padding(
+            padding: EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -310,8 +359,10 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
               ],
             ),
           ),
-          Visibility(
-            visible: isBreakRowVisible,
+
+          AnimatedOpacity(
+            opacity: isBreakRowVisible ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 250),
             child: Column(
               children: <Widget>[
                 Text(
@@ -322,10 +373,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
               ],
             ),
           ),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: selectWorkPlaceRow(),
-          ),
+
           saveShiftInformationButton(),
         ],
       ),

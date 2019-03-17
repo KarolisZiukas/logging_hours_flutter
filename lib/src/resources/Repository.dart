@@ -36,6 +36,10 @@ class Repository {
     return workPlaceDatabase.insertNewWorkPlace(model);
   }
 
+  Future<List<WorkPlaceModel>> getAllWorkPlaces() {
+    return workPlaceDatabase.getAllWorkPlaces();
+  }
+
   Future close() async {
     return shiftsDatabase.close();
   }

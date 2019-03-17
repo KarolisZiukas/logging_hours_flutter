@@ -42,5 +42,21 @@ class WorkPlaceDatabase {
     return model;
   }
 
+  Future<List<WorkPlaceModel>> getAllWorkPlaces() async {
+    var db = await getDatabase();
+    var maps = await db.query(tableName,
+        columns: [
+          WorkPlaceModel.dbWorkPlaceId,
+          WorkPlaceModel.dbWorkPlaceName,
+          WorkPlaceModel.dbWorkPlaceWage
+        ]);
+    if (maps.isNotEmpty) {
+      return maps.map((model) => WorkPlaceModel.fromMap(model)).toList();
+    } else {
+      print("No work place found");
+      return null;
+    }
+  }
+
   Future close() async => database.close();
 }
