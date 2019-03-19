@@ -21,7 +21,6 @@ class TimePickerComponent extends StatefulWidget {
 }
 
 class TimePickerComponentState extends State<TimePickerComponent> {
-  TimeOfDay currentTime = const TimeOfDay(hour: 7, minute: 28);
   var formatter = TimeOfDayFormat.HH_dot_mm;
   String formatted = "Select time";
 
@@ -29,7 +28,7 @@ class TimePickerComponentState extends State<TimePickerComponent> {
     final TimeOfDay picked =
         await showTimePicker(
             context: context,
-            initialTime: currentTime);
+            initialTime: TimeOfDay.now());
     if (picked != null)
       setState(() {
         if (picked.minute < 10) {

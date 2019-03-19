@@ -20,8 +20,10 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
   ShiftTimeModel shiftEndTime;
   ShiftTimeModel breakStartTime;
   ShiftTimeModel breakEndTime;
+  String selectedWorkPlaceName;
+  double selectWorkPlaceRate;
   String selectedWorkPlace = "Select work place";
-
+  bool didHadBreak = false;
 
   Widget selectWorkPlaceRow() {
     return Row(
@@ -51,8 +53,17 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
                 margin: EdgeInsets.all(16),
                 child: RaisedButton(
                   onPressed: () {
-                    saveShift(context, shiftDate, shiftStartTime, shiftEndTime,
-                        breakStartTime, breakEndTime);
+                    saveShift(
+                        context,
+                        shiftDate,
+                        shiftStartTime,
+                        shiftEndTime,
+                        didHadBreak,
+                        breakStartTime,
+                        breakEndTime,
+                        selectedWorkPlaceName,
+                        selectWorkPlaceRate
+                    );
                   },
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -142,6 +153,8 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
               onChanged: (WorkPlaceModel model) {
                 setState(() {
                   selectedWorkPlace = "${model.workPlaceName} ${model.workPlaceWage}\$/hour";
+                  selectedWorkPlaceName = model.workPlaceName;
+                  selectWorkPlaceRate = double.parse(model.workPlaceWage);
                 });
               },
             );
@@ -185,6 +198,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
 
   void setBreakRowVisibility(bool isVisible) {
     setState(() {
+      didHadBreak = isVisible;
       isBreakRowVisible = isVisible;
     });
   }
@@ -281,8 +295,12 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
       String shiftDate,
       ShiftTimeModel shiftStartTime,
       ShiftTimeModel shiftEndTime,
+      bool didHadBreak,
       ShiftTimeModel breakStartTime,
-      ShiftTimeModel breakEndTime) {
+      ShiftTimeModel breakEndTime,
+      String workPlaceName,
+      double workPlaceRate
+      ) {
     if (shiftDate != null) {
       var model = ShiftModel(
           shiftDate: shiftDate,
@@ -290,25 +308,55 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
               ShiftTimeModelHelper.getFormattedDateString(shiftStartTime),
           shiftEndTime:
               ShiftTimeModelHelper.getFormattedDateString(shiftEndTime),
-          breakStartTime:
-              ShiftTimeModelHelper.getFormattedDateString(breakStartTime),
-          breakEndTime:
-              ShiftTimeModelHelper.getFormattedDateString(breakEndTime),
+          breakStartTime: getFormattedBreakString(didHadBreak, breakStartTime),
+          breakEndTime: getFormattedBreakString(didHadBreak, breakEndTime),
           hoursWorked: WageCalculatorHelper.getFormattedTimeSpent(
               shiftStartTime, shiftEndTime),
-          breakDuration: WageCalculatorHelper.getFormattedTimeSpent(
-              breakStartTime, breakEndTime),
-          shiftName: "1",
+          breakDuration: getBreakDuration(didHadBreak, breakStartTime, breakEndTime),
+          shiftName: workPlaceName,
           shiftWage: WageCalculatorHelper.getCalculatedWage(
-                  shiftStartTime, shiftEndTime, 7,
-                  breakStartTime: breakStartTime, breakEndTime: breakEndTime)
-              .toString(),
-          hadBreak: "1");
+              shiftStartTime,
+              shiftEndTime,
+              workPlaceRate,
+              didHadBreak,
+              breakStartTime: breakStartTime,
+              breakEndTime: breakEndTime),
+          hadBreak: convertBreakBooleanToInt(didHadBreak).toString());
       bloc.insertShift(model);
       Navigator.pop(context, true);
     } else {
       print("Empty date");
     }
+  }
+
+  static int convertBreakBooleanToInt(bool didHadBreak) {
+    if (didHadBreak) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  static String getFormattedBreakString(bool didHadBreak, ShiftTimeModel model) {
+    if(didHadBreak) {
+      return ShiftTimeModelHelper.getFormattedDateString(model);
+    } else {
+      return ShiftTimeModelHelper.getFormattedDateString(ShiftTimeModel(0, 0));
+    }
+  }
+
+  static String getBreakDuration(
+      bool didHadBreak,
+      ShiftTimeModel startTime,
+      ShiftTimeModel endTime
+      ) {
+    if(didHadBreak) {
+      return WageCalculatorHelper.getFormattedTimeSpent(
+          startTime, endTime);
+    } else {
+      return "0";
+    }
+
   }
 
   @override

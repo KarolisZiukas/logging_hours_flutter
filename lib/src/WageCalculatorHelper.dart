@@ -22,9 +22,11 @@ class WageCalculatorHelper {
     return (shiftTime - breakTime) * hourlyRate;
   }
 
-  static double getCalculatedWage(ShiftTimeModel shiftStartTime,
+  static String getCalculatedWage(
+      ShiftTimeModel shiftStartTime,
       ShiftTimeModel shiftEndTime,
       double hourlyRate,
+      bool didHadBreak,
       {
         ShiftTimeModel breakStartTime,
         ShiftTimeModel breakEndTime
@@ -33,10 +35,10 @@ class WageCalculatorHelper {
     var timeWorked = calculateSpentTime(shiftStartTime, shiftEndTime);
     var timeOnABreak = 0;
 
-    if (breakEndTime != null && breakStartTime != null) {
+    if (didHadBreak) {
       timeOnABreak = calculateSpentTime(breakStartTime, breakEndTime);
     }
-    return (timeWorked - timeOnABreak) * (hourlyRate / 60);
+    return ((timeWorked - timeOnABreak) * (hourlyRate / 60)).toStringAsFixed(2);
   }
 
   static int convertHoursToMinutes(int hours) {
