@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging_hours/src/WageCalculatorHelper.dart';
 import 'package:logging_hours/src/addNewShift/AddNewShiftBloc.dart';
+import 'package:logging_hours/src/addNewShift/AddNewShiftDataValidator.dart';
 import 'package:logging_hours/src/addNewShift/ShiftModel.dart';
 import 'package:logging_hours/src/addNewShift/ShiftTimeModelHelper.dart';
 import 'package:logging_hours/src/addNewShift/WorkPlaceModel.dart';
@@ -41,7 +42,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
     );
   }
 
-  Widget saveShiftInformationButton() {
+  Widget saveShiftInformationButton(BuildContext bcontext) {
     return Flexible(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -54,7 +55,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
                 child: RaisedButton(
                   onPressed: () {
                     saveShift(
-                        context,
+                        bcontext,
                         shiftDate,
                         shiftStartTime,
                         shiftEndTime,
@@ -186,6 +187,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
 
   void printDate(String date) {
     setState(() {
+      print(date);
       shiftDate = date;
     });
   }
@@ -290,6 +292,13 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
       workPlaceWage: wage));
   }
 
+  static void onValidationError(BuildContext context, String error) {
+    final snackBar = SnackBar(
+        content: Text(error)
+    );
+    Scaffold.of(context).showSnackBar(snackBar);
+  }
+
   static void saveShift(
       BuildContext context,
       String shiftDate,
@@ -299,9 +308,19 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
       ShiftTimeModel breakStartTime,
       ShiftTimeModel breakEndTime,
       String workPlaceName,
-      double workPlaceRate
+      double workPlaceRate,
       ) {
-    if (shiftDate != null) {
+
+    var validationResult = AddNewShiftValidator.isInputValid(
+        shiftDate,
+        shiftStartTime,
+        shiftEndTime,
+        didHadBreak,
+        breakStartTime,
+        breakEndTime,
+        workPlaceName);
+    if(validationResult.status == ShiftValidationStatus.Success)
+      {
       var model = ShiftModel(
           shiftDate: shiftDate,
           shiftStartTime:
@@ -325,6 +344,7 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
       bloc.insertShift(model);
       Navigator.pop(context, true);
     } else {
+      onValidationError(context, validationResult.message);
       print("Empty date");
     }
   }
@@ -368,63 +388,66 @@ class AddNewShiftActivityState extends State<AddNewShiftActivity> {
         // the App.build method, and use it to set our appbar title.
         title: Text("Add new shift"),
       ),
-      body: Column(
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.only(top: 16),
-            child: Text(
-              "Shift date",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          DateRowComponent(
-            onPressed: printDate,
-          ),
-          Text(
-            "Work time",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          shiftTimePickerRow(),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: selectWorkPlaceRow(),
-          ),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  "Had a break?",
+      body: Builder(builder: (bcontext) =>
+          Column(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.only(top: 16),
+                child: Text(
+                  "Shift date",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                Switch(
-                  value: isBreakRowVisible,
-                  onChanged: (bool value) {
-                    setBreakRowVisibility(value);
-                  },
-                )
-              ],
-            ),
-          ),
-
-          AnimatedOpacity(
-            opacity: isBreakRowVisible ? 1.0 : 0.0,
-            duration: Duration(milliseconds: 250),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  "Break time",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              DateRowComponent(
+                onPressed: printDate,
+              ),
+              Text(
+                "Work time",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              shiftTimePickerRow(),
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: selectWorkPlaceRow(),
+              ),
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      "Had a break?",
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    Switch(
+                      value: isBreakRowVisible,
+                      onChanged: (bool value) {
+                        setBreakRowVisibility(value);
+                      },
+                    )
+                  ],
                 ),
-                breakTimePickerRow(),
-              ],
-            ),
-          ),
+              ),
 
-          saveShiftInformationButton(),
-        ],
-      ),
+              AnimatedOpacity(
+                opacity: isBreakRowVisible ? 1.0 : 0.0,
+                duration: Duration(milliseconds: 250),
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      "Break time",
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    breakTimePickerRow(),
+                  ],
+                ),
+              ),
+              saveShiftInformationButton(bcontext),
+            ],
+          ),
+    ),
     );
   }
 }
+
+
